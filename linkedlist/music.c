@@ -14,8 +14,8 @@ void add_end(Node **head, Node **tail, char *value);
 Node *search_by_position(Node *head, int position);
 void play(Node *pos);
 void add_after(Node *head, int pos, char *value, FILE *fp);
-void add_before(Node *head, int pos, char *value, FILE *fp);
-void delete (Node *head, int p);
+void add_before(Node **head, int pos, char *value, FILE *fp);
+void delete (Node **head, int p, FILE *fp);
 void sort_list(Node **head, FILE *fp);
 void insert_sorted(Node **head, Node *tmp);
 void traverse(Node *head);
@@ -58,9 +58,9 @@ int main()
             break;
         case 'J':
             printf("\nEnter a position: ");
-            scanf("%d", &p);
-            pos = search_by_position(head, p);
-            play(pos);
+            scanf("%d%c", &p, &dump);
+            curr = search_by_position(head, p);
+            play(curr);
             break;
         case 'N':
             if (curr->next == NULL)
@@ -70,8 +70,8 @@ int main()
             }
             else
             {
-                play(curr->next);
                 curr = curr->next;
+                play(curr);
             }
             break;
 
@@ -80,17 +80,19 @@ int main()
                 break;
             else
             {
-                play(curr->prev);
                 curr = curr->prev;
+                play(curr);
             }
             break;
 
         case 'F':
             play(head);
+            curr = head;
             break;
 
         case 'L':
             play(tail);
+            curr = tail;
             break;
 
         case 'A':
@@ -105,13 +107,13 @@ int main()
             scanf("%d%c", &p, &dump);
             printf("\nEnter a track: ");
             fgets(t, sizeof(t), stdin);
-            add_before(head, p, t, fp);
+            add_before(&head, p, t, fp);
             break;
 
         case 'R':
             printf("\nEnter a pos: ");
-            scanf("%d", &p);
-            delete (head, p);
+            scanf("%d%c", &p, &dump);
+            delete (&head, p, fp);
             break;
 
         case 'O':
@@ -223,34 +225,65 @@ void add_after(Node *head, int pos, char *value, FILE *fp)
     }
 }
 
-void add_before(Node *head, int pos, char *value, FILE *fp)
+void add_before(Node **head, int pos, char *value, FILE *fp)
 {
-    Node *temp, *pos_node = NULL;
-
+    Node *temp, *pos_node = NULL,*curr;
     temp = create_node(value);
-    pos_node = search_by_position(head, pos);
 
-    temp->prev = pos_node->prev;
-    temp->next = pos_node;
-    pos_node->prev->next = temp;
-    pos_node->prev = temp;
-
-    fp = fopen("music.txt", "w");
-    while (head != NULL)
+    if (pos == 1)
     {
-        fprintf(fp, "%s", head->data);
-        head = head->next;
+        temp->prev = NULL;
+        temp->next = (*head);
+        (*head)->prev = temp;
+        (*head) = temp;
+    }
+    else
+    {
+        pos_node = search_by_position(*head, pos);
+
+        temp->prev = pos_node->prev;
+        temp->next = pos_node;
+        pos_node->prev->next = temp;
+        pos_node->prev = temp;
+    }
+
+    curr=*head;
+    fp = fopen("music.txt", "w");
+    while (curr != NULL)
+    {
+        fprintf(fp, "%s", curr->data);
+        curr = curr->next;
     }
 }
 
-void delete (Node *head, int p)
+void delete (Node **head, int p, FILE *fp)
 {
-    Node *pos_node = NULL;
+    Node *pos_node = NULL, *tmp = NULL, *curr;
 
-    pos_node = search_by_position(head, p);
-    Node *tmp = pos_node->prev;
-    tmp->next = pos_node->next;
-    pos_node->next->prev = tmp;
+    if (p == 1)
+    {
+        tmp = *head;
+        (*head)->next->prev = NULL;
+        (*head) = (*head)->next;
+        free(tmp);
+    }
+    else
+    {
+        pos_node = search_by_position(*head, p);
+
+        tmp = pos_node->prev;
+        tmp->next = pos_node->next;
+        pos_node->next->prev = tmp;
+        free(pos_node);
+    }
+
+    curr = *head;
+    fp = fopen("music.txt", "w");
+    while (curr != NULL)
+    {
+        fprintf(fp, "%s", curr->data);
+        curr = curr->next;
+    }
 }
 
 void sort_list(Node **head, FILE *fp)
