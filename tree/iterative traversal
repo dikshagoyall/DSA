@@ -1,0 +1,70 @@
+void preorder(node *root)
+{
+    stack s;
+    init(&s);
+    while (root != NULL)
+    {
+        printf("%c ", root->data);
+        if (root->right != NULL)
+            push(&s, root->right);
+        if (root->left != NULL)
+            root = root->left;
+        else
+            root = pop(&s);
+    }
+}
+
+void postorder(node *root)
+{
+    node *tmp;
+    stack s;
+    init(&s);
+    do
+    {
+        while (root != NULL)
+        {
+            if (root->right != NULL)
+                push(&s, root->right);
+            push(&s, root);
+            root = root->left;
+        }
+        if (!isempty(&s))
+        {
+            root = pop(&s);
+            if (root->right == peek(&s))
+            {
+                tmp = pop(&s);
+                push(&s, root);
+                root = tmp;
+            }
+            else
+            {
+                printf("%c ", root->data);
+                root = NULL;
+            }
+        }
+
+    } while (1);
+}
+
+void inorder(node *root)
+{
+    stack s;
+    init(&s);
+    while (1)
+    {
+        while (root != NULL)
+        {
+            push(&s, root);
+            root = root->left;
+        }
+        if (isempty(&s))
+            break;
+        else
+        {
+            root=pop(&s);
+            printf("%c ", root->data);
+            root= root->right;
+        }
+    }
+}
